@@ -105,9 +105,10 @@ static const NSInteger kRunLoopRemoveTaskDelay = 100;
 }
 
 - (WZRunLoopObserver *(^)(NSUInteger))limit {
-    kRunLoopChainLockBlock(NSUInteger limit, {
-        self->_limitCount = limit;
-    });
+    return ^id(NSUInteger limit){
+        _limitCount = limit;
+        return self;
+    };
 }
 
 - (WZRunLoopObserver *(^)(BOOL))cache {
@@ -140,23 +141,28 @@ static const NSInteger kRunLoopRemoveTaskDelay = 100;
         
         __strong typeof(&*weakSelf) self = weakSelf;
         
+        // 无任务执行
         if (self.tasks.count == 0) return;
         
+        // 延迟指定次数执行
         if (self->_delay > 0) {
             self->_delay--;
             return;
         }
         
+        // 执行任务
         dispatch_block_t task = self.tasks.firstObject;
         task();
         [self.tasks removeObject:task];
         
+        // 添加缓存任务
         if (_isCache && self.caches.count) {
             id cacheTask = self.caches.firstObject;
             [self.tasks addObject:cacheTask];
             [self.caches removeObject:cacheTask];
         }
         
+        // 移除观察者
         [self removeObserver:observer];
         
     });
@@ -168,16 +174,19 @@ static const NSInteger kRunLoopRemoveTaskDelay = 100;
 - (void)removeObserver:(CFRunLoopObserverRef)observer {
     if (self.tasks.count == 0) {
         __weak typeof(&*self) weakSelf = self;
+        // 移除自定义队列observer
         if ([WZRunLoopObserver.manager.observers objectForKey:self.queueName]) {
             self.removeTask = ^{
                 CFRunLoopRemoveObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopCommonModes);
                 [WZRunLoopObserver.manager.observers removeObjectForKey:weakSelf.queueName];
             };
             
+            // 延迟100次后移除观察者
             WZRunLoopObserver.main.delay(kRunLoopRemoveTaskDelay).limit(1).
             add(self.removeTask);
         }
     }else {
+        // 主队列不做移除处理
         if (self.removeTask) {
             WZRunLoopObserver.main.cancel(self.removeTask);
             self.removeTask = nil;

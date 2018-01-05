@@ -10,7 +10,6 @@
 
 @interface WZRunLoopObserver : NSObject
 
-
 /**
  主任务队列, observer不会移除
  

@@ -5,7 +5,8 @@
 当界面需要大量渲染操作时会阻塞主线程，造成卡顿，比如tableView加载多张大图时。`WZRunLoopObserver`将耗费性能的任务分成若干子任务，并利用RunLoop的空闲时`kRunLoopBeforeWaiting`依次执行，从而大大降低了性能的消耗。
 
 ## 使用方法
-类似`Masonry`的链式调用语法，一目了然~
+类似`Masonry`的链式调用语法，一目了然~
+
 ### 添加任务
 ```objc
 WZRunLoopObserver.main.add(dispatch_block_t task).add(...);

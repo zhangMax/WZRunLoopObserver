@@ -105,7 +105,7 @@
     label.text = [NSString stringWithFormat:@"%ld", (long)indexPath.row];
     
     if (self.optimize) {
-        WZRunLoopObserver.main.limit(50).add(^{
+        WZRunLoopObserver.main.limit(50).cache(YES).add(^{
             imageView1.image = [UIImage imageWithContentsOfFile:path];
         }).add(^{
             imageView2.image = [UIImage imageWithContentsOfFile:path];
