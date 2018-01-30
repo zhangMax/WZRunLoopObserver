@@ -76,7 +76,6 @@ static const NSInteger kRunLoopRemoveTaskDelay = 100;
 + (WZRunLoopObserver *(^)(NSString *))queue {
     return ^id(NSString *queueName){
         NSAssert(queueName != nil, @"queueName should not be nil");
-        
         WZRunLoopObserver *observer = [WZRunLoopObserver.manager.observers objectForKey:queueName];
         if (!observer) {
             observer = [[WZRunLoopObserver alloc] initWithQueueName:queueName];
